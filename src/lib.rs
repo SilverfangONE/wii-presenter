@@ -1,3 +1,1 @@
-pub mod wiimote;
-pub mod presenter;
-pub mod error;
+pub mod wiiuse_subsystem;
