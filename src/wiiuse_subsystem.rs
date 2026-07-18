@@ -111,7 +111,23 @@ fn run_wiiuse_subsystem(
 
     // find and connect wiimotes
     let found_wm = search_wiimotes(wm_ptr_arr, amt_wm, SEARCH_TIMEOUT_SEC);
-    let _connected_wm = connect_wiimotes(wm_ptr_arr, found_wm).unwrap();
+    let _ = connect_wiimotes(wm_ptr_arr, found_wm).unwrap();
+
+    // set proper led
+    for i in 0..amt_wm as usize {
+        unsafe {
+            // 0x10 ist die erste LED.
+            // Durch << i wird aus:
+            // i=0 -> 0x10 (LED 1)
+            // i=1 -> 0x20 (LED 2)
+            // i=2 -> 0x40 (LED 3)
+            // i=3 -> 0x80 (LED 4)
+            let led_bitmask = 0x10 << i;
+
+            // Konvertiere zu i32, da C-Enums/Makros in bindgen meist i32 sind
+            wiiuse_sys::wiiuse_set_leds(wm_slices[i], led_bitmask as i32);
+        }
+    }
 
     // listen and poll events
     println!("[wiiuse] start communication subsystem");
