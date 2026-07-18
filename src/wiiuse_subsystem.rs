@@ -7,7 +7,7 @@ use std::sync::Arc;
 use std::{
     sync::{
         atomic::AtomicBool,
-        mpsc::{self, Receiver, Sender, channel},
+        mpsc::{Receiver, Sender, channel},
     },
     thread::{self, JoinHandle},
 };
@@ -17,7 +17,6 @@ const SEARCH_TIMEOUT_SEC: i32 = 5;
 
 type WiimotePtrArr = *mut *mut wiiuse_sys::wiimote_t;
 type WiimotePtr = *mut wiiuse_sys::wiimote_t;
-
 
 #[allow(non_camel_case_types)]
 pub enum WiimoteButton {
@@ -46,8 +45,11 @@ pub enum WiiuseEvent {
 impl From<u32> for WiiuseEvent {
     fn from(value: u32) -> Self {
         match value {
-            
-            _ => WiiuseEvent::WIIUSE_NONE,
+            wiiuse_sys::WIIUSE_EVENT_TYPE_WIIUSE_EVENT => WiiuseEvent::WIIUSE_EVENT,
+            wiiuse_sys::WIIUSE_EVENT_TYPE_WIIUSE_STATUS => WiiuseEvent::WIIUSE_STATUS,
+            wiiuse_sys::WIIUSE_EVENT_TYPE_WIIUSE_DISCONNECT => WiiuseEvent::WIIUSE_DISCONNECT,
+            wiiuse_sys::WIIUSE_EVENT_TYPE_WIIUSE_READ_DATA => WiiuseEvent::WIIUSE_READ_DATA,
+            wiiuse_sys::WIIUSE_EVENT_TYPE_WIIUSE_NONE | _ => WiiuseEvent::WIIUSE_NONE,
         }
     }
 }
@@ -66,6 +68,8 @@ fn get_version() -> String {
         }
     }
 }
+
+fn handle_wiiuse_event() {}
 
 /// loops until at least 1 wiimote is connected
 fn search_wiimotes(wm_ptr: WiimotePtrArr, amt_wiimotes: i32, timeout_sec: i32) -> i32 {
@@ -97,12 +101,13 @@ fn run_wiiuse_subsystem(
     shutdown_flag: Arc<AtomicBool>,
     amt_wm: i32,
 ) -> Result<(), Error> {
-    // init
-    let wm_ptr_arr;
-    unsafe {
-        wm_ptr_arr = wiiuse_sys::wiiuse_init(amt_wm);
-    }
     println!("[wiiuse] use 'wiiuse' v{}", get_version());
+
+    // init
+    let wm_ptr_arr = unsafe { wiiuse_sys::wiiuse_init(amt_wm) };
+    let wm_slices: &[WiimotePtr] = unsafe {
+        slice::from_raw_parts(wm_ptr_arr as *const WiimotePtr, amt_wm.try_into().unwrap())
+    };
 
     // find and connect wiimotes
     let found_wm = search_wiimotes(wm_ptr_arr, amt_wm, SEARCH_TIMEOUT_SEC);
@@ -110,36 +115,24 @@ fn run_wiiuse_subsystem(
 
     // listen and poll events
     println!("[wiiuse] start communication subsystem");
-    let wm_slices: &[WiimotePtr] = unsafe {
-        slice::from_raw_parts(wm_ptr_arr as *const WiimotePtr, amt_wm.try_into().unwrap())
-    };
-
     loop {
         if shutdown_flag.load(std::sync::atomic::Ordering::Relaxed) {
             break;
         }
-
-        unsafe {
-            if wiiuse_sys::wiiuse_poll(wm_ptr_arr, amt_wm) > 0 {
-                for i in 0..amt_wm as usize {
-                    let ptr = wm_slices[i];
-                    if ptr.is_null() {
-                        continue;
-                    }
-                    let wii_mote_ref = unsafe { &*ptr};
-                    match wii_mote_ref.event {
-                        wiiuse_sys::WIIUSE_EVENT_TYPE_WIIUSE_CONNECT
-                        _ => {}
-                    }
+        let changed_wm = unsafe { wiiuse_sys::wiiuse_poll(wm_ptr_arr, amt_wm) };
+        if changed_wm > 0 {
+            for i in 0..amt_wm as usize {
+                let ptr = wm_slices[i];
+                if ptr.is_null() {
+                    continue;
+                }
+                let wii_mote_ref = unsafe { &*ptr };
+                let wiiuse_event: WiiuseEvent = wii_mote_ref.event.into();
+                match wiiuse_event {
+                    WiiuseEvent::WIIUSE_EVENT => {}
+                    WiiuseEvent::WIIUSE_NONE | _ => {}
                 }
             }
-        }
-
-
-        for i in 0..amt_wm {
-            
-            // check for events
-        while (1) { if (wiiuse_poll(wiimotes, 2)) { int i = 0; for (; i < 2; ++i) { switch (wiimotes[i]->event) { /* check the events here */ } } } }
         }
     }
 
