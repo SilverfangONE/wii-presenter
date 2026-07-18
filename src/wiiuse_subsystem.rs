@@ -71,7 +71,12 @@ fn get_version() -> String {
     }
 }
 
-fn handle_wiiuse_event() {}
+fn handle_wiimote_event() {
+    unimplemented!();
+}
+fn handle_wiimote_disconnect() {
+    unimplemented!();
+}
 
 /// loops until at least 1 wiimote is connected
 fn search_wiimotes(wm_ptr: WiimotePtrArr, amt_wiimotes: i32, timeout_sec: i32) -> i32 {
@@ -150,7 +155,8 @@ fn run_wiiuse_subsystem(
                 let wii_mote_ref = unsafe { &*ptr };
                 let wiiuse_event: WiiuseEvent = wii_mote_ref.event.into();
                 match wiiuse_event {
-                    WiiuseEvent::WIIUSE_EVENT => {}
+                    WiiuseEvent::WIIUSE_DISCONNECT => handle_wiimote_disconnect(),
+                    WiiuseEvent::WIIUSE_EVENT => handle_wiimote_event(),
                     WiiuseEvent::WIIUSE_NONE | _ => {}
                 }
             }
