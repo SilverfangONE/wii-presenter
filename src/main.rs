@@ -37,22 +37,64 @@ fn run_presenter(wiiuse: Wiiuse) -> Result<(), Error> {
                 continue;
             }
 
+            // switching between slides
             if wiimote.is_just_pressed(WiimoteButton::A) {
-                println!("Button A wurde gedrückt!");
                 enigo
-                    .key(enigo::Key::RightArrow, enigo::Direction::Press)
+                    .key(enigo::Key::RightArrow, enigo::Direction::Click)
                     .unwrap();
                 rumble(&wiimote);
             }
             if wiimote.is_just_pressed(WiimoteButton::B) {
-                println!("Button B wurde gedrückt!");
                 enigo
-                    .key(enigo::Key::LeftArrow, enigo::Direction::Press)
+                    .key(enigo::Key::LeftArrow, enigo::Direction::Click)
                     .unwrap();
                 rumble(&wiimote);
             }
+
+            // stepping forth in browser
+            if wiimote.is_just_pressed(WiimoteButton::RIGHT) {
+                enigo.key(enigo::Key::Alt, enigo::Direction::Press).unwrap();
+
+                enigo
+                    .key(enigo::Key::RightArrow, enigo::Direction::Click)
+                    .unwrap();
+
+                enigo
+                    .key(enigo::Key::Alt, enigo::Direction::Release)
+                    .unwrap();
+
+                rumble(&wiimote);
+            }
+
+            // stepping behind in browser
+            if wiimote.is_just_pressed(WiimoteButton::LEFT) {
+                enigo.key(enigo::Key::Alt, enigo::Direction::Press).unwrap();
+
+                enigo
+                    .key(enigo::Key::LeftArrow, enigo::Direction::Click)
+                    .unwrap();
+
+                enigo
+                    .key(enigo::Key::Alt, enigo::Direction::Release)
+                    .unwrap();
+
+                rumble(&wiimote);
+            }
+
+            // scrolling up in browser
+            if wiimote.is_pressed(WiimoteButton::UP) {
+                enigo.scroll(5, enigo::Axis::Vertical).unwrap();
+                rumble(&wiimote);
+            }
+
+            // scrolling down in browser
+            if wiimote.is_pressed(WiimoteButton::DOWN) {
+                enigo.scroll(-5, enigo::Axis::Vertical).unwrap();
+                rumble(&wiimote);
+            }
+
+            // disconnect current wiimote
             if wiimote.is_just_pressed(WiimoteButton::HOME) {
-                println!("button Home ");
                 break;
             }
         }
