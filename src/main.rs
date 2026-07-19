@@ -83,13 +83,13 @@ fn run_presenter(wiiuse: Wiiuse) -> Result<(), Error> {
 
             // scrolling up in browser
             if wiimote.is_pressed(WiimoteButton::UP) {
-                enigo.scroll(5, enigo::Axis::Vertical).unwrap();
+                enigo.scroll(-6, enigo::Axis::Vertical).unwrap();
                 rumble(&wiimote);
             }
 
             // scrolling down in browser
             if wiimote.is_pressed(WiimoteButton::DOWN) {
-                enigo.scroll(-5, enigo::Axis::Vertical).unwrap();
+                enigo.scroll(6, enigo::Axis::Vertical).unwrap();
                 rumble(&wiimote);
             }
 
