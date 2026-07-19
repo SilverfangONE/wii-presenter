@@ -6,4 +6,4 @@ edition = "2024"
 [dependencies]
 enigo = "0.6.1"
 gilrs = "0.11.2"
-rs-wiiuse = { git = "https://github.com/SilverfangONE/rs-wiiuse.git", tag = "v0.1.1" }
+rs-wiiuse = { git = "https://github.com/SilverfangONE/rs-wiiuse.git", tag = "v0.1.2" }
