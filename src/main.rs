@@ -1,6 +1,6 @@
 use std::{thread::sleep, time::Duration};
 
-use rs_wiiuse::{WiimoteId, Wiiuse};
+use rs_wiiuse::{WiimoteButton, WiimoteId, Wiiuse};
 
 pub type Error = Box<dyn std::error::Error + Send + Sync + 'static>;
 
@@ -15,8 +15,9 @@ fn main() -> Result<(), Error> {
         wiimote.toggle_rumble();
     }
     loop {
-        if let Some(wm) = wii.get_wiimote(0) {
-            if wm.is_button_pressed(WiimoteButton::A) {
+        wiiuse.poll();
+        if let Some(wm) = wiiuse.get_wiimote_by_id(WiimoteId(0)) {
+            if wm.is_button_pressed(WiimoteButton::B) {
                 println!("Button A wurde gedrückt!");
             }
         }

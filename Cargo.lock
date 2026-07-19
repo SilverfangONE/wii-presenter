@@ -581,8 +581,8 @@ checksum = "d6f6ff9a378485b298a5286656da665ba74413d36db0979633275d2e708145d4"
 
 [[package]]
 name = "rs-wiiuse"
-version = "0.1.0"
-source = "git+https://github.com/SilverfangONE/rs-wiiuse.git?tag=v0.1.0#0f206527d96384f09bcaab358f4886e94819442d"
+version = "0.1.1"
+source = "git+https://github.com/SilverfangONE/rs-wiiuse.git?tag=v0.1.1#b614530ba38aa80595c49ccea01f764d27adc998"
 dependencies = [
  "bitflags",
  "wiiuse-sys",
