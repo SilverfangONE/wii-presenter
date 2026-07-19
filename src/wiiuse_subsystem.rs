@@ -4,6 +4,8 @@ use crate::error::Error;
 use core::slice;
 use std::ffi::CStr;
 use std::sync::Arc;
+use std::thread::sleep;
+use std::time::Duration;
 use std::{
     sync::{
         atomic::AtomicBool,
@@ -126,6 +128,9 @@ fn run_wiiuse_subsystem(
 
             // Konvertiere zu i32, da C-Enums/Makros in bindgen meist i32 sind
             wiiuse_sys::wiiuse_set_leds(wm_slices[i], led_bitmask as i32);
+            wiiuse_sys::wiiuse_toggle_rumble(wm_slices[i]);
+            sleep(Duration::from_secs(2));
+            wiiuse_sys::wiiuse_toggle_rumble(wm_slices[i]);
         }
     }
 
