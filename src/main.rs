@@ -1,5 +1,6 @@
 use std::{sync::Arc, thread::sleep, time::Duration};
 
+use enigo::{Enigo, Keyboard, Mouse, Settings};
 use rs_wiiuse::{Wiimote, WiimoteButton, WiimoteId, Wiiuse};
 
 pub type Error = Box<dyn std::error::Error + Send + Sync + 'static>;
@@ -7,6 +8,12 @@ pub type Error = Box<dyn std::error::Error + Send + Sync + 'static>;
 const SEARCH_TIMEOUT_SEC: u32 = 6;
 const NORMAL_TIMEOUT_MS: u8 = 80;
 const EXTENSION_TIMEOUT_MS: u8 = 100;
+
+fn rumble(wiimote: &Wiimote) {
+    wiimote.toggle_rumble();
+    sleep(Duration::from_millis(50));
+    wiimote.toggle_rumble();
+}
 
 fn setup_controller(wiimote: &Wiimote) {
     wiimote.set_leds(rs_wiiuse::WiimoteLeds::new().on_1());
@@ -17,6 +24,7 @@ fn setup_controller(wiimote: &Wiimote) {
 
 fn run_presenter(wiiuse: Wiiuse) -> Result<(), Error> {
     println!("[presenter] start presenter mode");
+    let mut enigo = Enigo::new(&Settings::default()).unwrap();
     loop {
         if let Some(wiimote) = wiiuse.get_wiimote_by_id(WiimoteId(0)) {
             if wiimote.is_disconnected() {
@@ -31,9 +39,17 @@ fn run_presenter(wiiuse: Wiiuse) -> Result<(), Error> {
 
             if wiimote.is_just_pressed(WiimoteButton::A) {
                 println!("Button A wurde gedrückt!");
+                enigo
+                    .key(enigo::Key::RightArrow, enigo::Direction::Press)
+                    .unwrap();
+                rumble(&wiimote);
             }
             if wiimote.is_just_pressed(WiimoteButton::B) {
                 println!("Button B wurde gedrückt!");
+                enigo
+                    .key(enigo::Key::LeftArrow, enigo::Direction::Press)
+                    .unwrap();
+                rumble(&wiimote);
             }
             if wiimote.is_just_pressed(WiimoteButton::HOME) {
                 println!("button Home ");
