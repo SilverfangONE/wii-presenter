@@ -4,7 +4,7 @@ use rs_wiiuse::{Wiimote, WiimoteButton, WiimoteId, Wiiuse};
 
 pub type Error = Box<dyn std::error::Error + Send + Sync + 'static>;
 
-const SEARCH_TIMEOUT_SEC: u32 = 3;
+const SEARCH_TIMEOUT_SEC: u32 = 6;
 const NORMAL_TIMEOUT_MS: u8 = 80;
 const EXTENSION_TIMEOUT_MS: u8 = 100;
 
@@ -34,6 +34,10 @@ fn run_presenter(wiiuse: Wiiuse) -> Result<(), Error> {
             }
             if wiimote.is_just_pressed(WiimoteButton::B) {
                 println!("Button B wurde gedrückt!");
+            }
+            if wiimote.is_just_pressed(WiimoteButton::HOME) {
+                println!("button Home ");
+                break;
             }
         }
     }
