@@ -16,12 +16,16 @@ fn setup_controller(wiimote: &Wiimote) {
 }
 
 fn run_presenter(wiiuse: Arc<Wiiuse>) -> Result<(), Error> {
+    println!("[presenter] start presenter mode");
     loop {
-        if wiiuse.poll() > 0
-            && let Some(wiimote) = wiiuse.get_wiimote_by_id(WiimoteId(0))
-        {
+        if let Some(wiimote) = wiiuse.get_wiimote_by_id(WiimoteId(0)) {
             if wiimote.is_disconnected() {
-                return Ok(());
+                println!("[presenter] disconnected wiimote");
+                break;
+            }
+
+            if wiiuse.poll() < 1 {
+                continue;
             }
 
             if wiimote.is_just_pressed(WiimoteButton::A) {
@@ -30,17 +34,22 @@ fn run_presenter(wiiuse: Arc<Wiiuse>) -> Result<(), Error> {
             if wiimote.is_just_pressed(WiimoteButton::B) {
                 println!("Button B wurde gedrückt!");
             }
+        } else {
+            println!("[presenter] no wiimotes anymore connected");
+            break;
         }
     }
+    println!("[presenter] exit presenter mode");
+    Ok(())
 }
 
 fn start_presenter(wiiuse: Arc<Wiiuse>) -> Result<(), Error> {
-    println!("[presenter] start connection listener");
-
     loop {
         // loop until connection establisehd to one wiimote
+        println!("[Search] listing for incoming wiimote connections..");
         loop {
-            if wiiuse.connect_all(SEARCH_TIMEOUT_SEC).unwrap() > 2 {
+            if let Ok(1) = wiiuse.connect_all(SEARCH_TIMEOUT_SEC) {
+                println!("[Search] connected to wiimote");
                 break;
             }
         }
