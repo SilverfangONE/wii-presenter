@@ -29,7 +29,6 @@ fn run_presenter(wiiuse: Wiiuse) -> Result<(), Error> {
         if let Some(wiimote) = wiiuse.get_wiimote_by_id(WiimoteId(0)) {
             if wiimote.is_disconnected() {
                 println!("[presenter] disconnected wiimote");
-                // drop
                 break;
             }
 
@@ -95,11 +94,13 @@ fn run_presenter(wiiuse: Wiiuse) -> Result<(), Error> {
 
             // disconnect current wiimote
             if wiimote.is_just_pressed(WiimoteButton::HOME) {
+                wiimote.set_leds(rs_wiiuse::WiimoteLeds::new());
                 break;
             }
         }
     }
     println!("[presenter] exit presenter mode");
+
     Ok(())
 }
 
