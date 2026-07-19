@@ -15,12 +15,13 @@ fn setup_controller(wiimote: &Wiimote) {
     wiimote.toggle_rumble();
 }
 
-fn run_presenter(wiiuse: Arc<Wiiuse>) -> Result<(), Error> {
+fn run_presenter(wiiuse: Wiiuse) -> Result<(), Error> {
     println!("[presenter] start presenter mode");
     loop {
         if let Some(wiimote) = wiiuse.get_wiimote_by_id(WiimoteId(0)) {
             if wiimote.is_disconnected() {
                 println!("[presenter] disconnected wiimote");
+                // drop
                 break;
             }
 
@@ -34,17 +35,18 @@ fn run_presenter(wiiuse: Arc<Wiiuse>) -> Result<(), Error> {
             if wiimote.is_just_pressed(WiimoteButton::B) {
                 println!("Button B wurde gedrückt!");
             }
-        } else {
-            println!("[presenter] no wiimotes anymore connected");
-            break;
         }
     }
     println!("[presenter] exit presenter mode");
     Ok(())
 }
 
-fn start_presenter(wiiuse: Arc<Wiiuse>) -> Result<(), Error> {
+fn start_presenter() -> Result<(), Error> {
     loop {
+        // setup wiiuse
+        let wiiuse = Wiiuse::init(1);
+        wiiuse.set_timeout(NORMAL_TIMEOUT_MS, EXTENSION_TIMEOUT_MS);
+
         // loop until connection establisehd to one wiimote
         println!("[Search] listing for incoming wiimote connections..");
         loop {
@@ -59,17 +61,13 @@ fn start_presenter(wiiuse: Arc<Wiiuse>) -> Result<(), Error> {
             setup_controller(&wiimote);
 
             // run presenter
-            run_presenter(wiiuse.clone())?;
+            run_presenter(wiiuse)?;
         }
+        println!("restart presenter");
     }
 }
 
 fn main() -> Result<(), Error> {
-    println!("[main] start wii-presenter by @SilverfangONE");
-
-    // setup wiiuse
-    let wiiuse = Arc::new(Wiiuse::init(1));
-    wiiuse.set_timeout(NORMAL_TIMEOUT_MS, EXTENSION_TIMEOUT_MS);
-
-    start_presenter(wiiuse)
+    println!("start wii-presenter by @SilverfangONE");
+    start_presenter()
 }
